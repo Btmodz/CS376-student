@@ -190,28 +190,28 @@ namespace Assets.Serialization
             switch (o)
             {
                 case null:
-                    throw new NotImplementedException("Fill me in");
+                    Write("null");
                     break;
 
                 case int i:
-                    throw new NotImplementedException("Fill me in");
+                    Write(i);
                     break;
 
                 case float f:
-                    throw new NotImplementedException("Fill me in");
+                    Write(f);
                     break;
 
                 // Not: don't worry about handling strings that contain quote marks
                 case string s:
-                    throw new NotImplementedException("Fill me in");
+                    Write($"\"{s}\"");
                     break;
 
                 case bool b:
-                    throw new NotImplementedException("Fill me in");
+                    Write(b ? "True" : "False");
                     break;
 
                 case IList list:
-                    throw new NotImplementedException("Fill me in");
+                    WriteList(list);
                     break;
 
                 default:
@@ -229,9 +229,28 @@ namespace Assets.Serialization
         /// If it hasn't then output #id { type: "typename", field: value ... }
         /// </summary>
         /// <param name="o">Object to serialize</param>
-        private void WriteComplexObject(object o)
-        {
-            throw new NotImplementedException("Fill me in");
+        private void WriteComplexObject(object o){
+            var (id, isNew) = GetId(o);
+
+            if(isNew) {
+
+                Write($"#{id} {{");
+                Write($"type: \"{o.GetType().Name}\", ");
+
+                var fields = Utilities.SerializedFields(o);
+
+                bool isFirstField = true;
+                foreach (var (fieldName, fieldValue) in fields){
+
+                    WriteField(fieldName, fieldValue, isFirstField);
+                    isFirstField = false;
+                }
+
+                Write(" }");
+            }
+            else {
+                Write($"#{id}");
+            }
         }
     }
 }
