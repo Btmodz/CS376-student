@@ -283,8 +283,7 @@ namespace Assets.Serialization
             var id = (int)ReadNumber(enclosingId);
             SkipWhitespace();
 
-            // You've got the id # of the object.  Are we done now?
-            throw new NotImplementedException("Fill me in");
+            if (idTable.ContainsKey(id)) return idTable[id];
 
             // Assuming we aren't done, let's check to make sure there's a { next
             SkipWhitespace();
@@ -306,14 +305,14 @@ namespace Assets.Serialization
                     $"Expected a type name (a string) in 'type: ...' expression for object id {id}, but instead got {typeName}");
 
             // Great!  Now what?
-            throw new NotImplementedException("Fill me in");
+            var objectData = new Dictionary<string, object>();
 
             // Read the fields until we run out of them
             while (!End && PeekChar != '}')
             {
                 var (field, value) = ReadField(id);
-                // We've got a field and a value.  Now what?
-                throw new NotImplementedException("Fill me in");
+
+                objData[field] = value;
             }
 
             if (End)
@@ -321,8 +320,8 @@ namespace Assets.Serialization
 
             GetChar();  // Swallow close bracket
 
-            // We're done.  Now what?
-            throw new NotImplementedException("Fill me in");
+            idTable[id] = objData;
+            return objData;
         }
 
     }
