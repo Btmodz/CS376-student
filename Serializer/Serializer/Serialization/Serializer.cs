@@ -207,7 +207,7 @@ namespace Assets.Serialization
                     break;
 
                 case bool b:
-                    Write(b ? "True" : "False");
+                    Write(b);
                     break;
 
                 case IList list:

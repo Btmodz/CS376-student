@@ -305,14 +305,14 @@ namespace Assets.Serialization
                     $"Expected a type name (a string) in 'type: ...' expression for object id {id}, but instead got {typeName}");
 
             // Great!  Now what?
-            var objectData = new Dictionary<string, object>();
+            var newObject = Utilities.MakeInstance(type);
 
             // Read the fields until we run out of them
             while (!End && PeekChar != '}')
             {
                 var (field, value) = ReadField(id);
 
-                objData[field] = value;
+                Utilities.SetFieldByName(newObject, field, value);
             }
 
             if (End)
@@ -320,8 +320,7 @@ namespace Assets.Serialization
 
             GetChar();  // Swallow close bracket
 
-            idTable[id] = objData;
-            return objData;
+            return newObject;
         }
 
     }
