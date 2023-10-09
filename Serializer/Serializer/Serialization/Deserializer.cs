@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace Assets.Serialization
@@ -283,7 +285,9 @@ namespace Assets.Serialization
             var id = (int)ReadNumber(enclosingId);
             SkipWhitespace();
 
-            if (idTable.ContainsKey(id)) return idTable[id];
+            // Check if the object with this ID has already been deserialized
+            if (idTable.ContainsKey(id))
+                return idTable[id];
 
             // Assuming we aren't done, let's check to make sure there's a { next
             SkipWhitespace();
@@ -297,21 +301,20 @@ namespace Assets.Serialization
             // Let's hope there's a type: typename line.
             var (hopefullyType, typeName) = ReadField(id);
             if (hopefullyType != "type")
-                throw new Exception(
-                    $"Expected type name at the beginning of complex object id {id} but instead got {typeName}");
+                throw new Exception($"Expected type name at the beginning of complex object id {id} but instead got {typeName}");
             var type = typeName as string;
             if (type == null)
-                throw new Exception(
-                    $"Expected a type name (a string) in 'type: ...' expression for object id {id}, but instead got {typeName}");
+                throw new Exception($"Expected a type name (a string) in 'type: ...' expression for object id {id}, but instead got {typeName}");
 
-            // Great!  Now what?
+            // Create a new instance of the object of the specified type
             var newObject = Utilities.MakeInstance(type);
+            idTable[id] = newObject;
 
             // Read the fields until we run out of them
             while (!End && PeekChar != '}')
             {
                 var (field, value) = ReadField(id);
-
+                // Set the field on the new object
                 Utilities.SetFieldByName(newObject, field, value);
             }
 
@@ -320,8 +323,12 @@ namespace Assets.Serialization
 
             GetChar();  // Swallow close bracket
 
+            // Store the deserialized object in the idTable and return it
+
+
             return newObject;
         }
+
 
     }
 }
