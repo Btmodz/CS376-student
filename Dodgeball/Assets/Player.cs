@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 
 /// <summary>
@@ -26,6 +27,29 @@ public class Player : MonoBehaviour
     /// </summary>
     public float OrbVelocity = 10;
 
+
+    private Rigidbody2D rb;
+
+    public SpriteRenderer spriteRenderer;
+    public float colorSpeed = 0.1f;
+
+    private Color[] rainbowColors = {
+        Color.red,
+        new Color(1, 0.5f, 0), // Orange
+        Color.yellow,
+        Color.green,
+        Color.cyan,
+        Color.blue,
+        new Color(0.5f, 0, 1) // Purple
+    };
+
+    private void Start()
+    {
+        rb = GetComponent<Rigidbody2D>();
+        spriteRenderer = GetComponent<SpriteRenderer>();
+        StartCoroutine(LoopThroughColors());
+    }
+
     /// <summary>
     /// Handle moving and firing.
     /// Called by Uniity every 1/50th of a second, regardless of the graphics card's frame rate
@@ -43,7 +67,15 @@ public class Player : MonoBehaviour
     /// </summary>
     void MaybeFire()
     {
-        // TODO
+        if (Input.GetButton("Fire"))
+        {
+
+            for (int i = 0; i < 10; i++)
+            {
+                FireOrb();
+            }
+        }
+
     }
 
     /// <summary>
@@ -53,7 +85,11 @@ public class Player : MonoBehaviour
     /// </summary>
     private void FireOrb()
     {
-        // TODO
+        GameObject newOrb = Instantiate(OrbPrefab, transform.position + (transform.right * 1.5f), Quaternion.identity);
+
+        Rigidbody2D orbBody = newOrb.GetComponent<Rigidbody2D>();
+
+        orbBody.velocity = transform.right * OrbVelocity;
     }
 
     /// <summary>
@@ -64,7 +100,14 @@ public class Player : MonoBehaviour
     /// </summary>
     void Manoeuvre()
     {
-        // TODO
+        float xInput = Input.GetAxis("Horizontal");
+        float yInput = Input.GetAxis("Vertical");
+
+        Vector2 thrust = new Vector2(xInput, yInput) * EnginePower;
+
+        rb.AddForce(thrust);
+
+        rb.angularVelocity = Input.GetAxis("Rotate") * RotateSpeed;
     }
 
     /// <summary>
@@ -74,5 +117,27 @@ public class Player : MonoBehaviour
     void OnBecameInvisible()
     {
         ScoreKeeper.ScorePoints(-1);
+    }
+
+    IEnumerator LoopThroughColors()
+    {
+        int currentColorIndex = 0;
+
+        while (true)
+        {
+            Color currentColor = rainbowColors[currentColorIndex];
+            Color nextColor = rainbowColors[(currentColorIndex + 1) % rainbowColors.Length]; // Loop back to the start when reaching the end
+
+            float elapsedTime = 0f;
+
+            while (elapsedTime < colorSpeed)
+            {
+                spriteRenderer.color = Color.Lerp(currentColor, nextColor, elapsedTime / colorSpeed);
+                elapsedTime += Time.deltaTime;
+                yield return null;
+            }
+
+            currentColorIndex = (currentColorIndex + 1) % rainbowColors.Length; // Move to next color
+        }
     }
 }

@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using UnityEngine;
 
 /// <summary>
@@ -20,12 +21,29 @@ public class Spawner : MonoBehaviour
     /// </summary>
     public float FreeRadius = 10;
 
+    [SerializeField]
+    private float timeSinceLastSpawn = 0;
+
     /// <summary>
     /// Check if we need to spawn and if so, do so.
     /// </summary>
-    // ReSharper disable once UnusedMember.Local
+    //ReSharper disable once UnusedMember.Local
     void Update()
     {
-        // TODO
+        if(timeSinceLastSpawn <= 0)
+        {
+            SpawnEnemy();
+            timeSinceLastSpawn = SpawnInterval;
+        }
+        else
+        {
+            timeSinceLastSpawn -= Time.deltaTime;
+        }
+    }
+
+    public void SpawnEnemy()
+    {
+        var spawnPoint = SpawnUtilities.RandomFreePoint(FreeRadius);
+        Instantiate(Prefab, spawnPoint, Quaternion.identity);
     }
 }

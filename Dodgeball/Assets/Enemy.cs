@@ -30,6 +30,7 @@ public class Enemy : MonoBehaviour
     /// Period the enemy should wait between shots
     /// </summary>
     public float CoolDownTime = 1;
+    private float timeSinceLastShot = 0;
 
     /// <summary>
     /// Prefab for the orb it fires
@@ -74,7 +75,15 @@ public class Enemy : MonoBehaviour
     // ReSharper disable once UnusedMember.Local
     void Update()
     {
-        // TODO
+        if(timeSinceLastShot <= 0)
+        {
+            Fire();
+            timeSinceLastShot = CoolDownTime;
+        }
+        else
+        {
+            timeSinceLastShot -= Time.deltaTime;
+        }
     }
 
     /// <summary>
@@ -83,7 +92,12 @@ public class Enemy : MonoBehaviour
     /// </summary>
     private void Fire()
     {
-        // TODO
+        GameObject newOrb = Instantiate(OrbPrefab, transform.position + (Vector3)HeadingToPlayer, Quaternion.identity);
+
+        Rigidbody2D orbBody = newOrb.GetComponent<Rigidbody2D>();
+
+        orbBody.velocity = OrbVelocity * HeadingToPlayer;
+        orbBody.mass = OrbMass;
     }
 
     /// <summary>
